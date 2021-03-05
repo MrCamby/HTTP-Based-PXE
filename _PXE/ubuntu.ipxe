@@ -1,0 +1,57 @@
+#!ipxe
+
+# Ubuntu Operating System
+# https://www.ubuntu.com
+
+goto ${menu}
+
+:ubuntu
+set os Ubuntu
+clear ubuntu_version
+clear install_url
+menu ${os} - ${arch_a}
+
+item --gap Desktop
+item --gap Server
+item 20.04.2-LTS-Server ${space} ${os} 20.04.2-LTS
+
+choose ubuntu_version || goto ubuntu_exit
+goto boot_type
+
+:boot_type
+menu ${os} [${ubuntu_version}] Installer
+item --gap Install Type
+item install ${space} Install
+item rescue ${space} Rescue Mode
+item automated ${space} Specify preseed/autoinstall url...
+choose --default ${type} type || goto ubuntu
+echo ${cls}
+goto deb_${type}
+
+:deb_rescue
+set install_params systemd.unit=rescue.target
+goto deb_install
+
+:deb_automated
+set install_name autoinstall
+set install_params autoinstall ds=nocloud-net;s=${install_url}
+goto deb_install
+
+:deb_install
+goto boot_test
+
+
+
+:boot_test
+imgfree
+isset ${dhcp-server} && set netboot_params ip=dhcp url=${lin_base_url}/${os}/${ubuntu_version}-${arch_a}/install.iso || set netboot_params
+kernel ${lin_base_url}/${os}/${ubuntu_version}-${arch_a}/vmlinuz root=/dev/ram0 ramdisk_size=1500000 ${netboot_params} ${install_params} initrd=initrd ${cmdline}
+initrd ${lin_base_url}/${os}/${ubuntu_version}-${arch_a}/initrd
+boot
+
+
+
+
+:ubuntu_exit
+clear menu
+exit 0

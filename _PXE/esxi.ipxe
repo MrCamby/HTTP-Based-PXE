@@ -1,0 +1,23 @@
+#!ipxe
+
+# VMWare ESXi Operating System
+# https://vmware.com/
+
+:esxi_menu
+set os ESXi
+menu ${os}
+item --gap ${os}
+item 7.0U1c VMvisor-Installer-7.0U1c
+choose esxi_version || goto esxi_exit
+goto esxi_install
+
+
+:esxi_install
+imgfree
+kernel ${esxi_version}/mboot.c32 -c ${esxi_version}/boot.cfg
+boot
+
+
+:esxi_exit
+clear menu
+exit 0

@@ -1,0 +1,31 @@
+#!ipxe
+
+# Microsoft Windows
+# https://www.microsoft.com
+
+set win_arch x64
+goto ${menu} ||
+
+:windows
+set os Microsoft Windows
+clear win_version
+menu ${os} 
+item --gap Installers
+item Windows-10 ${space} Windows 10
+choose win_version || goto windows_exit
+goto boot
+
+:boot
+imgfree
+kernel ${win_base_url}/wimboot
+initrd -n bootmgr     ${win_base_url}/${win_version}/bootmgr       bootmgr ||
+initrd -n bootmgr.efi ${win_base_url}/${win_version}/bootmgr.efi   bootmgr.efi ||      
+initrd -n bcd         ${win_base_url}/${win_version}/boot/bcd      bcd ||
+initrd -n bcd         ${win_base_url}/${win_version}/Boot/BCD      bcd ||
+initrd -n boot.sdi    ${win_base_url}/${win_version}/boot/boot.sdi boot.sdi ||
+initrd -n boot.sdi    ${win_base_url}/${win_version}/Boot/boot.sdi boot.sdi ||
+initrd -n boot.wim    ${win_base_url}/${win_version}/sources/boot.wim boot.wim
+boot
+
+:windows_exit
+exit 0
